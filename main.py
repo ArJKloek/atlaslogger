@@ -1,23 +1,8 @@
 import sys
-import os
+import subprocess
 from pathlib import Path
-from PyQt6.QtWidgets import QApplication, QMainWindow
-from PyQt6.QtUiTools import QUiLoader
-from PyQt6.QtCore import QFile, QIODevice
-
-
-def load_ui(ui_file_path):
-    """Load a UI file and return the main window widget."""
-    loader = QUiLoader()
-    ui_file = QFile(ui_file_path)
-    
-    if not ui_file.open(QIODevice.OpenModeFlag.ReadOnly):
-        raise FileNotFoundError(f"Cannot find UI file: {ui_file_path}")
-    
-    window = loader.load(ui_file)
-    ui_file.close()
-    
-    return window
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget
+from PyQt6.QtCore import Qt
 
 
 class MainWindow(QMainWindow):
@@ -33,24 +18,36 @@ class MainWindow(QMainWindow):
         ui_dir = Path(__file__).parent / "ui"
         ui_file = ui_dir / "main.ui"
         
-        # Load the UI file
-        ui_window = load_ui(str(ui_file))
+        # Compile UI file to Python module
+        ui_module_path = ui_dir / "main_ui.py"
         
-        # Copy properties from loaded UI to this window
-        self.setWindowTitle(ui_window.windowTitle())
-        self.setGeometry(ui_window.geometry())
+        try:
+            # Use pyuic6 to convert .ui to .py
+            subprocess.run(
+                ["pyuic6", str(ui_file), "-o", str(ui_module_path)],
+                check=True,
+                capture_output=True
+            )
+        except FileNotFoundError:
+            print("Error: pyuic6 not found. Install it with: pip install PyQt6-tools")
+            sys.exit(1)
+        except subprocess.CalledProcessError as e:
+            print(f"Error compiling UI file: {e.stderr.decode()}")
+            sys.exit(1)
         
-        # Set the central widget from the loaded UI
-        if ui_window.centralWidget():
-            self.setCentralWidget(ui_window.centralWidget())
+        # Import the generated UI module
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("main_ui", ui_module_path)
+        ui_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(ui_module)
         
-        # Transfer menu bar if it exists
-        if ui_window.menuBar():
-            self.setMenuBar(ui_window.menuBar())
+        # Create a central widget and setup the UI
+        self.central_widget = QWidget()
+        self.setCentralWidget(self.central_widget)
         
-        # Transfer status bar if it exists
-        if ui_window.statusBar():
-            self.setStatusBar(ui_window.statusBar())
+        # Setup the UI
+        self.ui = ui_module.Ui_MainWindow()
+        self.ui.setupUi(self)
 
 
 def main():
