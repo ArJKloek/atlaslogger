@@ -42,15 +42,33 @@
     </spacer>
    </item>
    <item row="0" column="4">
-    <widget class="QLabel" name="label">
-     <property name="font">
-      <font>
-       <family>Digital-7</family>
-       <pointsize>22</pointsize>
-      </font>
+    <widget class="QLCDNumber" name="lcdDegrees">
+     <property name="minimumSize">
+      <size>
+       <width>60</width>
+       <height>0</height>
+      </size>
      </property>
-     <property name="text">
-      <string>°C</string>
+     <property name="maximumSize">
+      <size>
+       <width>60</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="inputMethodHints">
+      <set>Qt::ImhNone</set>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <property name="digitCount">
+      <number>3</number>
+     </property>
+     <property name="segmentStyle">
+      <enum>QLCDNumber::Flat</enum>
      </property>
     </widget>
    </item>

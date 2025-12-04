@@ -26,6 +26,9 @@ class SensorWidget(QWidget):
                 # Update the sensor name if there's a label named 'label_name'
                 if hasattr(self, 'label_name'):
                     self.label_name.setText(self.sensor_name)
+                # Display "C" on the degrees LCD
+                if hasattr(self, 'lcdDegrees'):
+                    self.lcdDegrees.display("C")
             except Exception as e:
                 print(f"Error loading sensor UI: {e}")
         else:
