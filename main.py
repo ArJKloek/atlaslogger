@@ -107,8 +107,8 @@ class MainWindow(QMainWindow):
         
         # Example: Update sensor values (you can connect this to real data)
         self.sensor1.update_value(22.5)
-        self.sensor2.update_value(23.1)
-        self.sensor3.update_value(21.8)
+        self.sensor2.update_value(102.1)
+        self.sensor3.update_value(121.8)
         
         
 
