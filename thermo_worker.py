@@ -37,7 +37,7 @@ class DummySMtc:
         if HAS_PERLIN and self.noise_generators:
             # Use Perlin noise for smooth, realistic variations
             noise_val = self.noise_generators[ch_idx](time.time() * self.time_scale)
-            temp = base_temp + 10.0 * noise_val
+            temp = base_temp + 100.0 * noise_val
         else:
             # Fallback to very smooth sine wave if perlin_noise not installed
             phase = ch_idx * 0.6
