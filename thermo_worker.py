@@ -7,20 +7,43 @@ from typing import List
 
 from PyQt6.QtCore import QThread, pyqtSignal
 
+try:
+    from perlin_noise import PerlinNoise
+    HAS_PERLIN = True
+except ImportError:
+    HAS_PERLIN = False
+
 
 class DummySMtc:
-    """Synthetic thermocouple reader used when hardware is unavailable."""
+    """Synthetic thermocouple reader using Perlin noise for realistic temperature variation."""
 
     def __init__(self, channels: int = 8):
         self.channels = channels
+        self.time_scale = 0.1
+        if HAS_PERLIN:
+            # Create independent Perlin noise generators for each channel
+            self.noise_generators = [PerlinNoise(octaves=3, seed=ch) for ch in range(channels)]
+        else:
+            self.noise_generators = None
 
     def get_temp(self, channel: int) -> float:
-        """Return a plausible temperature value for the requested channel."""
-        phase = channel * 0.6
-        base = 24.0 + 3.0 * math.sin(time.time() / 5.0 + phase)
-        noise = random.uniform(-0.3, 0.3)
-        drift = 0.05 * channel
-        return round(base + drift + noise, 2)
+        """Return a realistic temperature value using Perlin noise."""
+        if channel < 1 or channel > self.channels:
+            return float("nan")
+        
+        ch_idx = channel - 1
+        base_temp = 20.0 + ch_idx * 2.0  # Slight offset per channel
+        
+        if HAS_PERLIN and self.noise_generators:
+            # Use Perlin noise for smooth, realistic variations
+            noise_val = self.noise_generators[ch_idx](time.time() * self.time_scale)
+            temp = base_temp + 5.0 * noise_val
+        else:
+            # Fallback to sine wave if perlin_noise not installed
+            phase = ch_idx * 0.6
+            temp = base_temp + 3.0 * math.sin(time.time() / 5.0 + phase)
+        
+        return round(temp, 2)
 
 
 class ThermoThread(QThread):
