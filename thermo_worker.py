@@ -19,10 +19,10 @@ class DummySMtc:
 
     def __init__(self, channels: int = 8):
         self.channels = channels
-        self.time_scale = 0.1
+        self.time_scale = 0.01  # Slower time scale for smoother variation
         if HAS_PERLIN:
-            # Create independent Perlin noise generators for each channel
-            self.noise_generators = [PerlinNoise(octaves=3, seed=ch) for ch in range(channels)]
+            # Create independent Perlin noise generators for each channel with more octaves for smoothness
+            self.noise_generators = [PerlinNoise(octaves=6, seed=ch) for ch in range(channels)]
         else:
             self.noise_generators = None
 
@@ -37,11 +37,11 @@ class DummySMtc:
         if HAS_PERLIN and self.noise_generators:
             # Use Perlin noise for smooth, realistic variations
             noise_val = self.noise_generators[ch_idx](time.time() * self.time_scale)
-            temp = base_temp + 5.0 * noise_val
+            temp = base_temp + 3.0 * noise_val
         else:
-            # Fallback to sine wave if perlin_noise not installed
+            # Fallback to very smooth sine wave if perlin_noise not installed
             phase = ch_idx * 0.6
-            temp = base_temp + 3.0 * math.sin(time.time() / 5.0 + phase)
+            temp = base_temp + 2.5 * math.sin(time.time() / 15.0 + phase)
         
         return round(temp, 2)
 
